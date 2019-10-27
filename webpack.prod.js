@@ -43,7 +43,8 @@ module.exports = {
   // 或/即在 package.json npm scripts 添加/修改命令
   // 开启文件监听，无需每次在文件变化后手动构建，但需要每次手动刷新浏览器
   // 默认 false，即不开启
-  watch: true,
+  // watch: true,
+  watch: false,
   // 只有开启监听模式，watchOptions 才有意义
   watchOptions: {
     // 默认为空，不监听的文件或文件夹，支持正则匹配
@@ -82,6 +83,15 @@ module.exports = {
           // 'style-loader',
           MiniCssExtractPlugin.loader,
           'css-loader',
+          {
+            loader: 'postcss-loader',
+            // autoprefixer 插件是 postcss 生态下的，与 webpack 插件没有关联，需要通过 loader 的 options 传递 postcss 所需要的插件
+            options: {
+              plugins: [
+                require('autoprefixer')
+              ]
+            }
+          },
           // less-loader 用于将 less 转换成 css
           // less-loader 依赖 less，需同时安装
           'less-loader'

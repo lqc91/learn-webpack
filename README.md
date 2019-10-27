@@ -216,7 +216,6 @@ module.exports = {
 // .babelrc
 {
     "presets": [
-        // 增加 ES6 的 babel preset 配置
         "@babel/preset-env"
     ],
     "plugins": [
@@ -233,7 +232,6 @@ module.exports = {
 // .babelrc
 {
     "presets": [
-        // 增加 React 的 bebel preset 配置
         "@babel/preset-react"
     ],
     "plugins": [
@@ -565,6 +563,63 @@ module.exports = {
         ]
     };
     ```
+
+## PostCSS 插件 autoprefixer 自动补全 CSS3 前缀
+
+- CSS3 属性前缀
+  - IE: Trident(-ms)
+  - Firefox: Geko(-moz)
+  - Chrome: Webkit(-webkit)
+  - Opera: Presto(-o)
+- 使用 autoprefixer 插件
+  - 根据 [Can I Use](https://caniuse.com/) 规则
+  - `postcss-loader` 执行顺序必须保证在 `css-loader` 之前（需要在 `css-loader` 将样式转换成 cjs 对象插入到 js 代码前），建议放在 `less` 或 `sass` 等预处理器之后，即 loader 顺序：
+    - `less-loader` or `sass-loader` > `postcss-loader` > `css-loader` > `style-loader` or `MiniCssExtractPlugin.loader`
+    - 不过 `postcss-loader` 放在 `less-loader` 之前问题也不大，平时使用的 `less` 语法基本不会和 `autoprefixer` 处理产生冲突
+  - `autoprefixer` 插件是 `postcss` 生态下的，与 webpack 插件没有关联，需要通过 `loader` 的 `options` 传递 `postcss` 所需要的插件
+  - [autoprefixer](https://github.com/postcss/autoprefixer) 9.6 已废弃 browsers 选项
+  - 建议将 `browserslist` 配置到 `package.json` 或 `.browserslistrc` 文件中
+  - 也可以将 `browsers` 改成 `overrideBrowserlist`，但不推荐
+  - 将版本列表写做类似 `last 2 version` 会被转换为 `versions`
+
+```js
+// webpack.config.js
+module.exports = {
+    module: {
+        rules: [
+            {
+                test: /\.less$/,
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    'less-loader',
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: [
+                                require('autoprefixer')
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+};
+```
+
+```json
+// package.josn
+{
+    "dependencies": {
+        "autoprefixer": [
+            "last 2 versions",
+            "> 1%",
+            "IE 10"
+        ]
+    }
+}
+```
 
 ## 参考资料
 
