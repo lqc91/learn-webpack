@@ -1,7 +1,5 @@
 # 什么是 Webpack
 
-[TOC]
-
 本质上，Webpack 是一个现代 JavaScript 应用程序的静态模块打包器（static module bundler）。在 Webpack 处理应用程序时，它会在内部创建一个依赖图（dependency graph），用于映射到项目需要的每个模块，然后将所有这些依赖生成一个或多个 bundle。
 
 ## webpack & Node.js
@@ -178,7 +176,7 @@ module.exports = {
 ## 常见的 plugin
 
 - `CommonsChunkPlugin`: 将 chunks 相同的模块代码提取成公共 JS
-- `cleanWebpackPlugin`: 清理构建目录
+- [`clean-webpack-plugin`](https://github.com/johnagan/clean-webpack-plugin): 构建前清理构建文件
 - `ExtractTextWebpackPlugin`: 将 CSS 从 bundle 文件里提取成一个独立的 CSS 文件
 - `CopyWebpackPlugin`: 将文件或文件夹拷贝到构建的输出目录
 - `HtmlWebpackPlugin`: 创建 html 文件去承载输出的 bundle
@@ -528,6 +526,45 @@ module.exports = {
     ]
 };
 ```
+
+## 自动清理构建目录产物
+
+- 每次构建时不清理目录，会造成构建的输出目录 output 文件越来越多
+- 通过 `npm scripts` 清理构建目录
+
+    ```js
+    // 递归删除目录及其内容，并执行 webpack 构建
+    rm -rf ./dist && webpack
+
+    // 使用 npm 包 rimraf 删除目录及其内容，并执行 webpack 构建
+    rimraf ./dist && webpack
+    ```
+
+- 使用 [`clean-webpack-plugin`](https://github.com/johnagan/clean-webpack-plugin)
+
+  - 默认删除 output 指定的输出目录
+
+    ```js
+    // 安装
+    npm -i clean-webpack-plugin -D
+
+    // webpack.config.js
+    // v3.0.0 引入方式
+    // es modules
+    import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+    // common js
+    const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+    // v2.0.2 引入方式
+    const CleanWebpackPlugin = require('clean-webpack-plugin');
+
+    // 使用
+    modeule.exports = {
+        plugins: [
+            new CleanWebpackPlugin()
+        ]
+    };
+    ```
 
 ## 参考资料
 

@@ -6,6 +6,8 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+// webpack v3.0 Replaced default export with named export CleanWebpackPlugin
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
 module.exports = {
   // 打包的入口文件
@@ -165,6 +167,7 @@ module.exports = {
             minifyJS: true,
             removeComments: false
         }
-    })
+    }),
+    new CleanWebpackPlugin()
   ]
 };

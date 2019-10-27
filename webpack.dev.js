@@ -4,6 +4,7 @@
 // 用于处理文件和目录路径
 const path = require('path');
 const webpack = require('webpack');
+const CleanWebpackPlugin= require('clean-webpack-plugin');
 
 module.exports = {
   // 打包的入口文件
@@ -109,6 +110,7 @@ module.exports = {
   },
   // plugin 插件配置在 plugins 数组中
   plugins: [
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
+    new CleanWebpackPlugin()
   ]
 };
