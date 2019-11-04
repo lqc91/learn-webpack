@@ -88,8 +88,20 @@ module.exports = {
             // autoprefixer 插件是 postcss 生态下的，与 webpack 插件没有关联，需要通过 loader 的 options 传递 postcss 所需要的插件
             options: {
               plugins: [
+                // autoprefixer 用于自动补全 CSS3 前缀
+                // autoprefixer 9.6 已废弃 browsers 选项
+                // 建议将 `browserslist` 配置到 package.json
                 require('autoprefixer')
               ]
+            }
+          },
+          {
+            loader: 'px2rem-loader',
+            options: {
+              // 1rem = 75px, 适合750px的视觉稿
+              remUnit: 75,
+              // px 转换为 rem 后小数点后的位数
+              remPrecision: 8
             }
           },
           // less-loader 用于将 less 转换成 css

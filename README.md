@@ -621,6 +621,58 @@ module.exports = {
 }
 ```
 
+## 移动端 CSS px 自动转换成 rem
+
+- CSS 媒体查询实现响应式布局
+  - 缺陷：需要写多套适配样式代码
+- rem
+  - W3C 对 rem 的定义：font-size of the root element
+  - rem 和 px 的对比
+    - rem 是相对单位
+    - px 是绝对单位
+- 移动端 CSS px 自动转换成 rem
+  - 使用 px2rem-loader
+  - 页面渲染时计算根元素的 font-size 值
+    - 可以使用手淘的 [lib-flexible](https://github.com/amfe/lib-flexible) 库
+    - 需要在 `<head>` 中引入，因为需要页面打开时立刻计算根元素的 font-size 值
+- 处理 less or sass 文件的 loader 顺序
+  - `less-loader` or `sass-loader` > `px2rem-loader` > `postcss-loader` > `css-loader` > `style-loader` or `MiniCssExtractPlugin.loader`
+
+```js
+// webpack.config.js
+module.exports = {
+    module: {
+        rules: [
+            {
+                test: /\.less$/,
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: [
+                                require('autoprefixer')
+                            ]
+                        }
+                    },
+                    {
+                        loader: 'px2rem-loader',
+                        options: {
+                            // 1 rem = 75 rem, 适合 750px 的视觉稿
+                            remUnit: 75,
+                            // px 转换为 rem 后小数点后的位数
+                            remPrecision: 8
+                        }
+                    },
+                    'less-loader'
+                ]
+            }
+        ]
+    }
+};
+```
+
 ## 参考资料
 
 - 三水清 · [Webpack 从零入门到工程化实战](https://www.imooc.com/read/29)
