@@ -634,7 +634,7 @@ module.exports = {
   - 使用 px2rem-loader
   - 页面渲染时计算根元素的 font-size 值
     - 可以使用手淘的 [lib-flexible](https://github.com/amfe/lib-flexible) 库
-    - 需要在 `<head>` 中引入，因为需要页面打开时立刻计算根元素的 font-size 值
+    - 需要复制js代码到 `<head>` 内，因为需要页面打开时立刻计算根元素的 font-size 值，且 node_modules 文件夹不会出现在仓库中
 - 处理 less or sass 文件的 loader 顺序
   - `less-loader` or `sass-loader` > `px2rem-loader` > `postcss-loader` > `css-loader` > `style-loader` or `MiniCssExtractPlugin.loader`
 
@@ -673,8 +673,74 @@ module.exports = {
 };
 ```
 
+## 静态资源内联
+
+- 资源内联的意义
+  - 代码层面
+    - 页面框架的初始化脚本？
+    - 上报相关打点？
+    - CSS 内联避免页面闪动
+  - 请求层面：减少 HTTP 网络请求数
+    - 小图片或字体内联（url-loader）
+  - raw-loader 内联 HTML，JS
+    - raw-loader 可以将文件作为字符串导入
+    - HTML 内联
+      - `${require('raw-loader!./meta.html')}`
+    - JS 内联
+      - `<script>${require('raw-loader!babel-loader!../node_modules/lib-flexible/flexible.js')}</script>`
+    - **raw-loader 需使用 0.5.1 版**（`npm i raw-loader@0.5.1 -D`）
+      - 最新版的 3.x 导出模块直接使用了 export default 的写法，html 里面的模块这样写，webpack 解析不了，需要是 cjs 的写法才行
+  - CSS 内联
+    - 方案一：借助 style-loader
+
+        ```js
+        // webpack.config.js
+        module.exports = {
+            module: {
+                rules: [
+                    {
+                        test: /\.scss$/,
+                        use: [
+                            {
+                                loader: 'style-loader',
+                                options: {
+                                    // 样式插入到 <head>
+                                    insertAt: 'top',
+                                    // 将所有的 style 标签合并成一个
+                                    singleton: true
+                                }
+                            },
+                            'css-loader',
+                            'sass-loader'
+                        ]
+                    }
+                ]
+            }
+        };
+        ```
+
+    - 方案二：[html-inline-css-webpack-plugin](https://github.com/Runjuu/html-inline-css-webpack-plugin)
+      - html-inline-css-webpack-plugin 需放在 html-webpack-plugin 后面
+
+        ```js
+        // webpack.config.js
+        const HTMLInlineCSSWebpackPlugin = require("html-inline-css-webpack-plugin").default;
+        module.exports = {
+            plugins: [
+                new MiniCssExtractPlugin({
+                    filename: '[name]_[contenthash:8].css'
+                }),
+                new HtmlWebpackPlugin(),
+                new HTMLInlineCSSWebpackPlugin()
+            ]
+        };
+        ```
+
+  - 压缩导入的html, css, js 可使用 html-webpack-plugin 的 minify 参数
+
 ## 参考资料
 
 - 三水清 · [Webpack 从零入门到工程化实战](https://www.imooc.com/read/29)
 - 程柳锋 · [玩转 webpack](https://time.geekbang.org/course/intro/190)
+- 程柳锋 · [webpack4 中如何实现资源内联？](https://github.com/cpselvis/blog/issues/5)
 - [webpack 中文文档](https://webpack.docschina.org/concepts/)

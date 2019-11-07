@@ -7,6 +7,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 // webpack v3.0 Replaced default export with named export CleanWebpackPlugin
+const HTMLInlineCSSWebpackPlugin = require('html-inline-css-webpack-plugin').default;
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
 module.exports = {
@@ -190,6 +191,7 @@ module.exports = {
             removeComments: false
         }
     }),
+    new HTMLInlineCSSWebpackPlugin(),
     new CleanWebpackPlugin()
   ]
 };
