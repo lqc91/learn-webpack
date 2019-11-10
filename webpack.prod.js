@@ -206,5 +206,6 @@ module.exports = {
     }),
     new HTMLInlineCSSWebpackPlugin(),
     new CleanWebpackPlugin()
-  ])
+  ]),
+  devtool: 'none'
 };

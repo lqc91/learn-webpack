@@ -844,6 +844,44 @@ module.exports = {
 };
 ```
 
+## 使用 sourcemap
+
+- 作用：通过 source map 定位到源代码的错误位置
+  - [source map 科普文](http://www.ruanyifeng.com/blog/2013/01/javascript_source_map.html)
+- 开发环境开启，线上环境关闭
+  - 线上排查问题的时候可以将 sourcemap 上传到错误监控系统
+- [source map 关键字(可组合使用)](https://webpack.docschina.org/configuration/devtool)
+  - eval: 使用 eval 包裹模块代码
+  - source-map: 产生 .map 文件
+  - cheap: 不包含列信息
+  - inline: 将 .map 作为 DataURI 嵌入，不单独生成 .map 文件
+  - module: 包含 loader 的 sourcemap
+- **通过 devtool 控制如何显示 sourcemap**
+- 一般在实际项目中
+  - 生产环境不使用 `source-map` 或有 Sentry 之类错误跟踪系统时使用 `source-map`（既不暴露源代码，也方便解决生产环境遇到的 bug）
+  - 开发环境使用 `cheap-module-eval-source-map`
+    - 综合考虑首次构建及二次构建打包速度，及是否可定位源码
+
+### 不同 source map 类型对应打包速度及特点
+
+- +++ 非常快速，++ 快速，+ 比较快，0 中等，- 比较慢，-- 慢
+
+devtool | 首次构建速度 | 二次构建速度 | 是否适合生产环境 | 可定位的代码
+------- | ------------ | ------------ | ---------------- | ------------
+留空，none | +++ | +++ | yes | 打包后最终输出的代码
+eval | +++ | +++ | no | webpack 生成的代码（一个个的模块）
+cheap-eval-source-map | + | ++ | no | 经过loader转换过的代码（只能看到行）
+cheap-module-eval-source-map | 0 | ++ | no | 源代码（只能看到行）
+eval-source-map | - | + | no | 源代码
+cheap-source-map | + | 0 | no | 经过loader转换过的代码（只能看到行）
+cheap-module-source-map | 0 | - | no | 源代码（只能看到行）
+inline-cheap-source-map | + | 0 | no | 经过loader转换过的代码（只能看到行）
+inline-cheap-module-source-map | 0 | - | no | 源代码（只能看到行）
+source-map | - | - | yes | 源代码
+inline-source-map | - | - | no | 源代码
+hidden-source-map | - | - | yes | 源代码
+nosources-source-map | - | - | yes | 无源代码内容
+
 ## 参考资料
 
 - 三水清 · [Webpack 从零入门到工程化实战](https://www.imooc.com/read/29)
