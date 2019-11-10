@@ -720,7 +720,7 @@ module.exports = {
         ```
 
     - 方案二：[html-inline-css-webpack-plugin](https://github.com/Runjuu/html-inline-css-webpack-plugin)
-      - html-inline-css-webpack-plugin 需放在 html-webpack-plugin 后面
+      - ==html-inline-css-webpack-plugin 需放在 html-webpack-plugin 后面==
 
         ```js
         // webpack.config.js
@@ -737,6 +737,112 @@ module.exports = {
         ```
 
   - 压缩导入的html, css, js 可使用 html-webpack-plugin 的 minify 参数
+
+## 多页面应用打包通用方案
+
+- 多页应用(MPA)概念
+  - 每一次页面跳转的时候，后台服务器都会返回一个新的 html 文档，这种类型的网站也就是多页网站，也叫做多页应用
+- 单页面应用所有业务都放在一个大的入口，不同的子业务是同一个 URL，只是 hash 会发生变化
+- 多页面打包基本思路
+  - 每个页面对应一个 entry，一个 html-webpack-plugin
+  - 优点：每个页面之间是解耦的；对 SEO 更加友好
+  - 缺点：每次新增或删除页面需要更改 webpack 配置
+
+  ```js
+  module.exports = {
+      entry: {
+          index: './src/index.js',
+          search: './src/search.js'
+      }
+  };
+  ```
+
+- 多页面打包通用方案
+  - 动态获取 entry 和设置 html-webpack-plugin 数量
+
+    ```js
+    module.exports = {
+        entry: {
+            index: './src/index/index.js',
+            search: './src/search/index.js'
+        }
+    };
+    ```
+
+  - [glob](https://www.npmjs.com/package/glob)
+  - 利用 glob.sync
+    - `entry: glob.sync(path.join(__dirname, './src/*/index.js'))`
+
+```js
+// webpack.config.js
+// 引入 glob 模块
+const glob = require('glob');
+
+// 动态设置 entry 和 htmlWebpackPlugins
+const setMPA = () => {
+  const entry = {};
+  const htmlWebpackPlugins = [];
+
+  const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js'));
+
+  Object.keys(entryFiles)
+    .map(index => {
+      const entryFile = entryFiles[index];
+
+      const match = entryFile.match(/src\/(.*)\/index\.js/);
+
+      const pageName = match && match[1];
+
+      entry[pageName] = entryFile;
+
+      htmlWebpackPlugins.push(
+        new HtmlWebpackPlugin({
+          template: path.join(__dirname, `src/${pageName}/index.html`),
+          filename: `${pageName}.html`,
+          // 当前页面包含的 chunk，
+          // 可直接用 entry 的 key 命名
+          chunks: [pageName],
+          inject: true,
+          minify: {
+              html5: true,
+              collapseWhitespace: true,
+              preserveLineBreaks: false,
+              minifyCSS: true,
+              minifyJS: true,
+              removeComments: false
+          }
+        })
+      );
+    });
+
+  return {
+    entry,
+    htmlWebpackPlugins
+  }
+};
+
+const {entry, htmlWebpackPlugins} = setMPA();
+
+module.exports = {
+    entry: entry,
+    output: {
+      filename: '[name]_[chunkhash:8].js',
+      path: __dirname + '/dist'
+    },
+    // html-inline-css-webpack-plugin 需放在 html-webpack-plugin 后面
+    plugins: htmlWebpackPlugins.concat([
+      new MiniCssExtractPlugin({
+        filename: '[name]_[contenthash:8].css'
+      }),
+      new OptimizeCssAssetsPlugin({
+        assetNameRegExp: /\.css$/g,
+        cssProcessor: require('cssnano')
+      }),
+      new HTMLInlineCSSWebpackPlugin(),
+      new CleanWebpackPlugin()
+    ])
+};
+```
 
 ## 参考资料
 

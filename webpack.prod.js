@@ -9,16 +9,59 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 // webpack v3.0 Replaced default export with named export CleanWebpackPlugin
 const HTMLInlineCSSWebpackPlugin = require('html-inline-css-webpack-plugin').default;
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const glob = require('glob');
+
+// 动态设置 entry 和 htmlWebpackPlugins
+const setMPA = () => {
+  const entry = {};
+  const htmlWebpackPlugins = [];
+
+  const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js'));
+
+  Object.keys(entryFiles)
+    .map(index => {
+      const entryFile = entryFiles[index];
+
+      const match = entryFile.match(/src\/(.*)\/index\.js/);
+
+      const pageName = match && match[1];
+
+      entry[pageName] = entryFile;
+
+      htmlWebpackPlugins.push(
+        new HtmlWebpackPlugin({
+          template: path.join(__dirname, `src/${pageName}/index.html`),
+          filename: `${pageName}.html`,
+          // 当前页面包含的 chunk，
+          // 可直接用 entry 的 key 命名
+          chunks: [pageName],
+          inject: true,
+          minify: {
+              html5: true,
+              collapseWhitespace: true,
+              preserveLineBreaks: false,
+              minifyCSS: true,
+              minifyJS: true,
+              removeComments: false
+          }
+        })
+      );
+    });
+
+  return {
+    entry,
+    htmlWebpackPlugins
+  }
+};
+
+const {entry, htmlWebpackPlugins} = setMPA();
 
 module.exports = {
   // 打包的入口文件
   // 单入口：entry 是一个字符串
   // entry: './src/index.js',
   // 多入口：entry 是一个对象
-  entry: {
-    index: './src/index.js',
-    search: './src/search.js'
-  },
+  entry: entry,
   // 打包的输出
   // output 只能有一个
   output: {
@@ -153,7 +196,7 @@ module.exports = {
     ]
   },
   // plugin 插件配置在 plugins 数组中
-  plugins: [
+  plugins: htmlWebpackPlugins.concat([
     new MiniCssExtractPlugin({
       filename: '[name]_[contenthash:8].css'
     }),
@@ -161,37 +204,7 @@ module.exports = {
         assetNameRegExp: /\.css$/g,
         cssProcessor: require('cssnano')
     }),
-    new HtmlWebpackPlugin({
-        template: path.join(__dirname, 'src/index.html'),
-        filename: 'index.html',
-        // 当前页面包含的 chunk，
-        // 可直接用 entry 的 key 命名
-        chunks: ['index'],
-        inject: true,
-        minify: {
-            html5: true,
-            collapseWhitespace: true,
-            preserveLineBreaks: false,
-            minifyCSS: true,
-            minifyJS: true,
-            removeComments: false
-        }
-    }),
-    new HtmlWebpackPlugin({
-        template: path.join(__dirname, 'src/search.html'),
-        filename: 'search.html',
-        chunks: ['search'],
-        inject: true,
-        minify: {
-            html5: true,
-            collapseWhitespace: true,
-            preserveLineBreaks: false,
-            minifyCSS: true,
-            minifyJS: true,
-            removeComments: false
-        }
-    }),
     new HTMLInlineCSSWebpackPlugin(),
     new CleanWebpackPlugin()
-  ]
+  ])
 };
