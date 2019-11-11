@@ -3,13 +3,14 @@
 // 引入 Node 内置的 path 模块
 // 用于处理文件和目录路径
 const path = require('path');
+const glob = require('glob');
+// const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 // webpack v3.0 Replaced default export with named export CleanWebpackPlugin
 const HTMLInlineCSSWebpackPlugin = require('html-inline-css-webpack-plugin').default;
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
-const glob = require('glob');
 const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
 
 // 动态设置 entry 和 htmlWebpackPlugins
@@ -207,6 +208,10 @@ module.exports = {
     }),
     new HTMLInlineCSSWebpackPlugin(),
     new CleanWebpackPlugin(),
+    // 直接使用 production mode 时，代码会被压缩，不容易看出 scope hoisting 效果
+    // 将 mode 设为 none，手动引入该插件，方便观察前后变化
+    // new webpack.optimize.ModuleConcatenationPlugin()
+    // 使用 html-webpack-externals-plugin 分离基础库
     // new HtmlWebpackExternalsPlugin({
     //   externals: [
     //     {
@@ -223,6 +228,7 @@ module.exports = {
     // })
   ]),
   optimization: {
+    // SplitChunksPlugin 分离页面公共资源
     splitChunks: {
       minSize: 0,
       cacheGroups: {
