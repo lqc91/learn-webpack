@@ -10,6 +10,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HTMLInlineCSSWebpackPlugin = require('html-inline-css-webpack-plugin').default;
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const glob = require('glob');
+const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
 
 // 动态设置 entry 和 htmlWebpackPlugins
 const setMPA = () => {
@@ -34,7 +35,7 @@ const setMPA = () => {
           filename: `${pageName}.html`,
           // 当前页面包含的 chunk，
           // 可直接用 entry 的 key 命名
-          chunks: [pageName],
+          chunks: ['commons',pageName],
           inject: true,
           minify: {
               html5: true,
@@ -201,11 +202,37 @@ module.exports = {
       filename: '[name]_[contenthash:8].css'
     }),
     new OptimizeCssAssetsPlugin({
-        assetNameRegExp: /\.css$/g,
-        cssProcessor: require('cssnano')
+      assetNameRegExp: /\.css$/g,
+      cssProcessor: require('cssnano')
     }),
     new HTMLInlineCSSWebpackPlugin(),
-    new CleanWebpackPlugin()
+    new CleanWebpackPlugin(),
+    // new HtmlWebpackExternalsPlugin({
+    //   externals: [
+    //     {
+    //       module: 'react',
+    //       entry: 'https://cdn.bootcss.com/react/16.10.2/umd/react.production.min.js',
+    //       global: 'React'
+    //     },
+    //     {
+    //       module: 'react-dom',
+    //       entry: 'https://cdn.bootcss.com/react-dom/16.10.2/umd/react-dom.production.min.js',
+    //       global: 'ReactDOM'
+    //     }
+    //   ]
+    // })
   ]),
+  optimization: {
+    splitChunks: {
+      minSize: 0,
+      cacheGroups: {
+        commons: {
+          name: 'commons',
+          chunks: 'all',
+          minChunks: 2
+        }
+      }
+    }
+  },
   devtool: 'none'
 };

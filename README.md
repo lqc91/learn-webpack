@@ -882,6 +882,129 @@ inline-source-map | - | - | no | 源代码
 hidden-source-map | - | - | yes | 源代码
 nosources-source-map | - | - | yes | 无源代码内容
 
+## 提取页面公共资源
+
+- 基础库分离
+  - 思路：将 react, react-dom 基础包通过 cdn 引入，不打入 bundle 中
+  - 方法：使用 html-webpack-externals-plugin
+    - ==html-webpack-externals-plugin 需放在 html-webpack-plugin 后面==
+    - ==react 和 react-dom 在 index.html 中被引入一次，在 search.html 中被引入两次？==
+
+    ```js
+    // webpack.config.js
+    const const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
+
+    module.exports = {
+        plugins: [
+            new HtmlWebpackPlugin(),
+            new HtmlWebpackExternalsPlugin(
+                externals: [
+                    {
+                      module: 'react',
+                      entry: 'https://cdn.bootcss.com/react/16.10.2/umd/react.production.min.js',
+                      global: 'React'
+                    },
+                    {
+                      module: 'react-dom',
+                      entry: 'https://cdn.bootcss.com/react-dom/16.10.2/umd/react-dom.production.min.js',
+                      global: 'ReactDOM'
+                    }
+                ]
+            )
+        ]
+    }
+    ```
+
+- 利用 SplitChunksPlugin 进行公共脚本分离
+  - Webpack4 内置的 SplitChunksPlugin，替代 CommonsChunksPlugin 插件
+  - chunks 参数说明
+    - async: 异步引入的库进行分离（默认）
+    - initial: 同步引入的库进行分离
+    - all: 所有引入的库进行分离（推荐）
+  - test: 匹配出需要分离的包
+  - minChunks: 设置最小引用次数为2次
+  - minSize: 分离的包的体积的大小
+  - **公共文件打包出来后，在页面中引用需要在htmlWebpackPlugin.chunks中加入公共文件名**
+
+```js
+// webpack.config.js
+module.exports = {
+    // ...
+    optimization: {
+        splitChunks: {
+            // 三选一： "initial" | "all" | "async" (默认)
+            chunks: 'async',
+            // 最小尺寸，30K，development 下是10k
+            // 越大那么单个文件越大，chunk 数就会变少
+            // 针对于提取公共 chunk 的时候，不管再大也不会把动态加载的模块合并到初始化模块中
+            // 当这个值很大的时候就不会做公共部分的抽取了
+            minSize: 30000,
+            // 文件的最大尺寸，0为不限制，优先级：maxInitialRequest/maxAsyncRequests < maxSize < minSize
+            maxSize: 0,
+            // 默认1，被提取的一个模块至少需要在几个 chunk 中被引用，这个值越大，抽取出来的文件就越小
+            minChunks: 1,
+            // 在做一次按需加载的时候最多有多少个异步请求，为 1 的时候就不会抽取公共 chunk 了
+            maxAsyncRequests: 5,
+            // 针对一个 entry 做初始化模块分隔的时候的最大文件数，优先级高于 cacheGroup，所以为 1 的时候就不会抽取 initial common 了
+            maxInitialRequests: 3,
+            // 打包文件名分隔符
+            automaticNameDelimiter: '~',
+            // 拆分出来文件的名字，默认为 true，表示自动生成文件名，如果设置为固定的字符串那么所有的 chunk 都会被合并成一个
+            name: true,
+            cacheGroups: {
+                vendors: {
+                    // 正则规则，如果符合就提取 chunk
+                    test: /[\\/]node_modules[\\/]/,
+                    // 缓存组优先级，当一个模块可能属于多个 chunkGroup，这里是优先级
+                    priority: -10
+                },
+                default: {
+                    minChunks: 2,
+                    priority: -20, // 优先级
+                    // 如果该chunk包含的modules都已经另一个被分割的chunk中存在，那么直接引用已存在的chunk，不会再重新产生一个
+                    reuseExistingChunk: true
+                }
+            }
+        }
+    }
+};
+```
+
+```js
+// webpack.config.js
+module.exports = {
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /(react|react-dom)/,
+                    name: 'vendors',
+                    chunks: 'all'
+                }
+            }
+        }
+    }
+};
+```
+
+```js
+// webpack.config.js
+module.exports = {
+    optimization: {
+        splitChunks: {
+            minSize: 0,
+            cacheGroups: {
+                commons: {
+                    name: 'commons',
+                    chunks: 'all',
+                    minChunks: 2
+                }
+            }
+        }
+    }
+};
+```
+
 ## 参考资料
 
 - 三水清 · [Webpack 从零入门到工程化实战](https://www.imooc.com/read/29)

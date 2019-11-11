@@ -4,6 +4,7 @@
 import React from 'react';
 // 引入 react-dom
 import ReactDOM from 'react-dom';
+import '../../common';
 import logo from './images/logo.png';
 // 引入 css
 // import './search.css';
