@@ -157,5 +157,5 @@ module.exports = {
     // 开启 webpack-dev-server 的 HMR （热更新）功能
     hot: true
   },
-  devtool: 'cheap-module-eval-source-map'
+  devtool: 'source-map'
 };

@@ -8,10 +8,11 @@ const glob = require('glob');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// webpack v3.0 Replaced default export with named export CleanWebpackPlugin
 const HTMLInlineCSSWebpackPlugin = require('html-inline-css-webpack-plugin').default;
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+// webpack v3.0 Replaced default export with named export CleanWebpackPlugin
 const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
+const webpack = require('webpack');
 
 // 动态设置 entry 和 htmlWebpackPlugins
 const setMPA = () => {
@@ -83,7 +84,7 @@ module.exports = {
   // mode 用于指定当前构建环境类型
   // production, development, none
   // 默认值为 production
-  mode: 'production',
+  mode: 'none',
   // 开启文件监听
   // 另一种开启文件监听的方式是启动 webpack 命令时，带上 --watch 参数
   // 或/即在 package.json npm scripts 添加/修改命令
@@ -210,22 +211,22 @@ module.exports = {
     new CleanWebpackPlugin(),
     // 直接使用 production mode 时，代码会被压缩，不容易看出 scope hoisting 效果
     // 将 mode 设为 none，手动引入该插件，方便观察前后变化
-    // new webpack.optimize.ModuleConcatenationPlugin()
+    new webpack.optimize.ModuleConcatenationPlugin(),
     // 使用 html-webpack-externals-plugin 分离基础库
-    // new HtmlWebpackExternalsPlugin({
-    //   externals: [
-    //     {
-    //       module: 'react',
-    //       entry: 'https://cdn.bootcss.com/react/16.10.2/umd/react.production.min.js',
-    //       global: 'React'
-    //     },
-    //     {
-    //       module: 'react-dom',
-    //       entry: 'https://cdn.bootcss.com/react-dom/16.10.2/umd/react-dom.production.min.js',
-    //       global: 'ReactDOM'
-    //     }
-    //   ]
-    // })
+    new HtmlWebpackExternalsPlugin({
+      externals: [
+        {
+          module: 'react',
+          entry: 'https://cdn.bootcss.com/react/16.10.2/umd/react.production.min.js',
+          global: 'React'
+        },
+        {
+          module: 'react-dom',
+          entry: 'https://cdn.bootcss.com/react-dom/16.10.2/umd/react-dom.production.min.js',
+          global: 'ReactDOM'
+        }
+      ]
+    })
   ]),
   optimization: {
     // SplitChunksPlugin 分离页面公共资源

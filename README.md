@@ -1076,6 +1076,27 @@ module.exports = {
 - harmony import 指代 ES6 的 import 语法
 - harmony export 指代 ES6 的 export 语法
 
+## 31. 代码分割和动态 import
+
+### 代码分割的意义
+
+- 对于大的 Web 应用来讲，将所有的代码都放在一个文件中显然是不够有效的，特别是当你的某些代码是在某些特殊的时候才能被使用到。webpack 有一个功能就是将你的代码库分割成 chunks(语块)，当代码运行到需要它们的时候再进行加载
+- 适用的场景
+  - 抽离相同代码到一个共享块
+  - 脚本懒加载，使得初始下载的代码更小
+
+### 懒加载 JS 脚本的方式
+
+- CommonJS: require.ensure
+- ES6: 动态 import（目前还没有原生支持，需要 babel 转换）
+
+### 如何使用动态 import
+
+- 安装 babel 插件
+  - `npm install @babel/plugin-synax-dynamic-import --save-dev`
+- ES6: 动态 import（目前还没有原生支持，需要 babel 转换）
+  - `{ "plugins": ["@babel/plugin-syntax-dynamic-import"] }`
+
 ## 参考资料
 
 - 三水清 · [Webpack 从零入门到工程化实战](https://www.imooc.com/read/29)
