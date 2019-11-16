@@ -1,10 +1,9 @@
-'use strict';
 
 // 引入 Node 内置的 path 模块
 // 用于处理文件和目录路径
 const path = require('path');
 const webpack = require('webpack');
-const {CleanWebpackPlugin}= require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const glob = require('glob');
 
@@ -16,7 +15,7 @@ const setMPA = () => {
   const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js'));
 
   Object.keys(entryFiles)
-    .map(index => {
+    .map((index) => {
       const entryFile = entryFiles[index];
 
       const match = entryFile.match(/src\/(.*)\/index\.js/);
@@ -34,31 +33,31 @@ const setMPA = () => {
           chunks: [pageName],
           inject: true,
           minify: {
-              html5: true,
-              collapseWhitespace: true,
-              preserveLineBreaks: false,
-              minifyCSS: true,
-              minifyJS: true,
-              removeComments: false
-          }
-        })
+            html5: true,
+            collapseWhitespace: true,
+            preserveLineBreaks: false,
+            minifyCSS: true,
+            minifyJS: true,
+            removeComments: false,
+          },
+        }),
       );
     });
 
   return {
     entry,
-    htmlWebpackPlugins
-  }
+    htmlWebpackPlugins,
+  };
 };
 
-const {entry, htmlWebpackPlugins} = setMPA();
+const { entry, htmlWebpackPlugins } = setMPA();
 
 module.exports = {
   // 打包的入口文件
   // 单入口：entry 是一个字符串
   // entry: './src/index.js',
   // 多入口：entry 是一个对象
-  entry: entry,
+  entry,
   // 打包的输出
   // output 只能有一个
   output: {
@@ -66,7 +65,7 @@ module.exports = {
     filename: '[name].js',
     // __dirname: 当前模块的目录名
     // 等同于 path.dirname(__filename)
-    path: __dirname + '/dist'
+    path: `${__dirname}/dist`,
     // or
     // path.join 使用平台特定的分隔符将所有给定大的路径段连接在一起，并规范化生成的路径
     // path: path.join(__dirname, 'dist')
@@ -93,7 +92,7 @@ module.exports = {
     aggregateTimeout: 300,
     // 判断文件是否发生变化是通过不断询问系统指定文件是否变化实现的
     // 默认询问 1000次/秒
-    poll: 1000
+    poll: 1000,
   },
   module: {
     // loader 配置在 module.rules 数组中
@@ -102,7 +101,7 @@ module.exports = {
         // test 指定匹配规则
         test: /\.js$/,
         // use 指定使用的 loader 名称
-        use: 'babel-loader'
+        use: 'babel-loader',
       },
       {
         test: /\.css$/,
@@ -111,8 +110,8 @@ module.exports = {
           // style-loader 将样式通过 <style> 标签插入到 head 中
           'style-loader',
           // css-loader 用于加载解析 .css 文件，转换成 commonjs 对象，并传递给 style-loader
-          'css-loader'
-        ]
+          'css-loader',
+        ],
       },
       {
         test: /\.less$/,
@@ -121,8 +120,8 @@ module.exports = {
           'css-loader',
           // less-loader 用于将 less 转换成 css
           // less-loader 依赖 less，需同时安装
-          'less-loader'
-        ]
+          'less-loader',
+        ],
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg)$/,
@@ -135,27 +134,27 @@ module.exports = {
             // 可以设置较小资源自动 base64
             loader: 'url-loader',
             options: {
-              // 小于 10KB(10240Bytes) 
-              limit: 10240
-            }
-          }
-        ]
+              // 小于 10KB(10240Bytes)
+              limit: 10240,
+            },
+          },
+        ],
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
-        use: 'file-loader'
-      }
-    ]
+        use: 'file-loader',
+      },
+    ],
   },
   // plugin 插件配置在 plugins 数组中
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new CleanWebpackPlugin()
+    new CleanWebpackPlugin(),
   ].concat(htmlWebpackPlugins),
   devServer: {
     contentBase: './dist',
     // 开启 webpack-dev-server 的 HMR （热更新）功能
-    hot: true
+    hot: true,
   },
-  devtool: 'source-map'
+  devtool: 'source-map',
 };

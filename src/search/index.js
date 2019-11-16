@@ -1,4 +1,6 @@
-'use strict';
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable react/jsx-filename-extension */
 
 // 引入 react
 import React from 'react';
@@ -13,17 +15,19 @@ import logo from './images/logo.png';
 import './search.less';
 
 // 代码不会实际执行，不会出现在 bundle 文件中
+// eslint-disable-next-line no-constant-condition
 if (false) {
+  // eslint-disable-next-line no-undef
   a();
 }
 
 class Search extends React.Component {
-
   constructor() {
+    // eslint-disable-next-line prefer-rest-params
     super(...arguments);
 
     this.state = {
-      Text: null
+      Text: null,
     };
   }
 
@@ -31,23 +35,26 @@ class Search extends React.Component {
     // 动态 import 返回 Promise 对象
     import('./text.js').then((Text) => {
       this.setState({
-        Text: Text.default
+        Text: Text.default,
       });
     });
   }
 
   render() {
     const { Text } = this.state;
-    return <div className="search-text">
-      {
-        Text ? <Text /> : null
-      }
-      搜索文字的内容<img src={ logo } onClick={ this.loadComponent.bind(this) } />
-    </div>
+    return (
+      <div className="search-text">
+        {
+          Text ? <Text /> : null
+        }
+        搜索文字的内容
+        <img src={logo} onClick={this.loadComponent.bind(this)} alt="img" />
+      </div>
+    );
   }
 }
 
 ReactDOM.render(
   <Search />,
-  document.getElementById('root')
+  document.getElementById('root'),
 );

@@ -1097,6 +1097,88 @@ module.exports = {
 - ES6: 动态 import（目前还没有原生支持，需要 babel 转换）
   - `{ "plugins": ["@babel/plugin-syntax-dynamic-import"] }`
 
+## 使用 ESLint
+
+### 行业内优秀的 ESLint 规范实践
+
+- Airbnb: [eslint-config-airbnb](https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb), [eslint-config-airbnb-base](https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb-base)
+- [JavaScript Standard Style Guide](https://github.com/standard/standard/blob/master/docs/README-zhcn.md)
+- [Google JavaScript 代码规范](https://google.github.io/styleguide/jsguide.html)
+
+### 在 webpack 中使用 ESLint
+
+- 安装 `eslint`, `eslint-plugin-import`
+  - `npm install eslint eslint-plugin-import --save-dev`
+- 安装 `eslint-loader`, `eslint-formatter-friendly`
+  - `npm install eslint-loader eslint-formatter-friendly --save-dev`
+  - `eslint-formatter-friendly` 用于指定错误报告的格式规范，让报错更好看
+- 若使用业内优秀规范实践，需安装对应的 ESLint 配置 NPM 模块
+  - `npm install eslint-config-airbnb --save-dev`
+  - `npm install eslint-config-google --save-dev`
+  - `npm install eslint-config-standard --save-dev`
+- 安装 `babel-eslint`，用于将其作为指定解析器
+  - `npm install babel-eslint --save-dev`
+- 配置 `webpack.config.js`
+
+```js
+// webpack.config.js
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: [
+          'babel-loader',
+          {
+            loader: 'eslint-loader',
+            options: {
+              fix: true, // 自动修复问题，将改变源文件
+              formatter: require('eslint-friendly-formatter')
+            }
+          }
+        ]
+      }
+    ]
+  }
+};
+```
+
+- 配置 `.eslintrc.js`
+  - ESLint 的报错类型包括三种：off, warn, error，分别对应0, 1, 2
+  - 禁用 `console`, `debugger` 等调试代码，是为避免将其发布到线上
+  - 若要使用禁用的 `console`, `debugger` 等，可以使用 ESLint 的注释
+
+```js
+// eslint-disable-next-line no-console
+console.log('使用 console');
+```
+
+```js
+// .eslintrc.js
+module.exports = {
+  "parser": "babel-eslint", // 指定解析器
+  "extends": "airbnb-base", // 使用 airbnb 配置扩展规则
+  // 若使用 react 配置为 airbnb，须同时安装其他 NPM 模块
+  "env": { // 启用 browser 和 Node.js 环境
+    "browser": true,
+    "node": true
+  },
+  "rules": { // 配置规则
+    "no-console": 2,
+    "no-debugger": 2,
+    "no-alert": 2,
+    "no-unused-vars": 2,
+    "no-undef": 2
+  }
+}
+```
+
+- 使用 eslint cli 修复问题
+  - 全局安装 eslint cli `npm i eslint -g`
+  - 使用 eslint cli 命令修复问题
+    - `eslint --fix [file].js` 或 `eslint --fix [dir]`
+
 ## 参考资料
 
 - 三水清 · [Webpack 从零入门到工程化实战](https://www.imooc.com/read/29)

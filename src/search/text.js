@@ -1,3 +1,4 @@
 import React from 'react';
 
-export default() => <div>动态 import</div>;
+// eslint-disable-next-line react/jsx-filename-extension
+export default () => <div>动态 import</div>;

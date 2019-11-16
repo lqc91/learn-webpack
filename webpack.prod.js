@@ -1,5 +1,3 @@
-'use strict';
-
 // 引入 Node 内置的 path 模块
 // 用于处理文件和目录路径
 const path = require('path');
@@ -9,7 +7,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HTMLInlineCSSWebpackPlugin = require('html-inline-css-webpack-plugin').default;
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 // webpack v3.0 Replaced default export with named export CleanWebpackPlugin
 const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
 const webpack = require('webpack');
@@ -22,7 +20,8 @@ const setMPA = () => {
   const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js'));
 
   Object.keys(entryFiles)
-    .map(index => {
+    // eslint-disable-next-line array-callback-return
+    .map((index) => {
       const entryFile = entryFiles[index];
 
       const match = entryFile.match(/src\/(.*)\/index\.js/);
@@ -37,34 +36,34 @@ const setMPA = () => {
           filename: `${pageName}.html`,
           // 当前页面包含的 chunk，
           // 可直接用 entry 的 key 命名
-          chunks: ['commons',pageName],
+          chunks: ['commons', pageName],
           inject: true,
           minify: {
-              html5: true,
-              collapseWhitespace: true,
-              preserveLineBreaks: false,
-              minifyCSS: true,
-              minifyJS: true,
-              removeComments: false
-          }
-        })
+            html5: true,
+            collapseWhitespace: true,
+            preserveLineBreaks: false,
+            minifyCSS: true,
+            minifyJS: true,
+            removeComments: false,
+          },
+        }),
       );
     });
 
   return {
     entry,
-    htmlWebpackPlugins
-  }
+    htmlWebpackPlugins,
+  };
 };
 
-const {entry, htmlWebpackPlugins} = setMPA();
+const { entry, htmlWebpackPlugins } = setMPA();
 
 module.exports = {
   // 打包的入口文件
   // 单入口：entry 是一个字符串
   // entry: './src/index.js',
   // 多入口：entry 是一个对象
-  entry: entry,
+  entry,
   // 打包的输出
   // output 只能有一个
   output: {
@@ -73,7 +72,7 @@ module.exports = {
     filename: '[name]_[chunkhash:8].js',
     // __dirname: 当前模块的目录名
     // 等同于 path.dirname(__filename)
-    path: __dirname + '/dist'
+    path: `${__dirname}/dist`,
     // or
     // path.join 使用平台特定的分隔符将所有给定的路径段连接在一起，并规范化生成的路径
     // path: path.join(__dirname, 'dist')
@@ -100,7 +99,7 @@ module.exports = {
     aggregateTimeout: 300,
     // 判断文件是否发生变化是通过不断询问系统指定文件是否变化实现的
     // 默认询问 1000次/秒
-    poll: 1000
+    poll: 1000,
   },
   module: {
     // loader 配置在 module.rules 数组中
@@ -109,7 +108,10 @@ module.exports = {
         // test 指定匹配规则
         test: /\.js$/,
         // use 指定使用的 loader 名称
-        use: 'babel-loader'
+        use: [
+          'babel-loader',
+          'eslint-loader',
+        ],
       },
       {
         test: /\.css$/,
@@ -121,8 +123,8 @@ module.exports = {
           // 与 style-loader 功能互斥
           MiniCssExtractPlugin.loader,
           // css-loader 用于加载解析 .css 文件，转换成 commonjs 对象，并传递给 style-loader
-          'css-loader'
-        ]
+          'css-loader',
+        ],
       },
       {
         test: /\.less$/,
@@ -132,15 +134,16 @@ module.exports = {
           'css-loader',
           {
             loader: 'postcss-loader',
-            // autoprefixer 插件是 postcss 生态下的，与 webpack 插件没有关联，需要通过 loader 的 options 传递 postcss 所需要的插件
+            // autoprefixer 插件是 postcss 生态下的，与 webpack 没有关联，需要通过 loader 的 options 传递 postcss 所需要的插件
             options: {
               plugins: [
                 // autoprefixer 用于自动补全 CSS3 前缀
                 // autoprefixer 9.6 已废弃 browsers 选项
                 // 建议将 `browserslist` 配置到 package.json
-                require('autoprefixer')
-              ]
-            }
+                // eslint-disable-next-line global-require
+                require('autoprefixer'),
+              ],
+            },
           },
           {
             loader: 'px2rem-loader',
@@ -148,13 +151,13 @@ module.exports = {
               // 1rem = 75px, 适合750px的视觉稿
               remUnit: 75,
               // px 转换为 rem 后小数点后的位数
-              remPrecision: 8
-            }
+              remPrecision: 8,
+            },
           },
           // less-loader 用于将 less 转换成 css
           // less-loader 依赖 less，需同时安装
-          'less-loader'
-        ]
+          'less-loader',
+        ],
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg)$/,
@@ -168,7 +171,7 @@ module.exports = {
           //   // 添加到 JS 文件，看不到文件名？
           //   loader: 'url-loader',
           //   options: {
-          //     // 小于 10KB(10240Bytes) 
+          //     // 小于 10KB(10240Bytes)
           //     limit: 10240
           //   }
           // }
@@ -177,10 +180,10 @@ module.exports = {
             options: {
               // 为图片文件添加 hash
               // [ext] 为资源后缀名占位符
-              name: '[name]_[hash:8].[ext]'
-            }
-          }
-        ]
+              name: '[name]_[hash:8].[ext]',
+            },
+          },
+        ],
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
@@ -191,21 +194,22 @@ module.exports = {
             options: {
               // 为字体文件添加 hash
               // [ext] 为资源后缀名占位符
-              name: '[name]_[hash:8].[ext]'
-            }
-          }
-        ]
-      }
-    ]
+              name: '[name]_[hash:8].[ext]',
+            },
+          },
+        ],
+      },
+    ],
   },
   // plugin 插件配置在 plugins 数组中
   plugins: htmlWebpackPlugins.concat([
     new MiniCssExtractPlugin({
-      filename: '[name]_[contenthash:8].css'
+      filename: '[name]_[contenthash:8].css',
     }),
     new OptimizeCssAssetsPlugin({
       assetNameRegExp: /\.css$/g,
-      cssProcessor: require('cssnano')
+      // eslint-disable-next-line global-require
+      cssProcessor: require('cssnano'),
     }),
     new HTMLInlineCSSWebpackPlugin(),
     new CleanWebpackPlugin(),
@@ -218,15 +222,15 @@ module.exports = {
         {
           module: 'react',
           entry: 'https://cdn.bootcss.com/react/16.10.2/umd/react.production.min.js',
-          global: 'React'
+          global: 'React',
         },
         {
           module: 'react-dom',
           entry: 'https://cdn.bootcss.com/react-dom/16.10.2/umd/react-dom.production.min.js',
-          global: 'ReactDOM'
-        }
-      ]
-    })
+          global: 'ReactDOM',
+        },
+      ],
+    }),
   ]),
   optimization: {
     // SplitChunksPlugin 分离页面公共资源
@@ -236,10 +240,10 @@ module.exports = {
         commons: {
           name: 'commons',
           chunks: 'all',
-          minChunks: 2
-        }
-      }
-    }
+          minChunks: 2,
+        },
+      },
+    },
   },
-  devtool: 'none'
+  devtool: 'none',
 };
